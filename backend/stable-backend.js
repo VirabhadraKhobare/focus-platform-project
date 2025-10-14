@@ -40,6 +40,48 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Root landing page - serve friendly HTML for browsers, JSON for API clients
+app.get('/', (req, res) => {
+  const endpoints = [
+    'GET /health',
+    'GET /api/activities',
+    'GET /api/activities/:id',
+    'POST /api/activities/:id/complete',
+    'POST /api/auth/register',
+    'POST /api/auth/login',
+    'GET /api/leaderboard'
+  ];
+
+  // If the client accepts HTML, return a minimal landing page with links
+  if (req.accepts && req.accepts('html')) {
+    const html = `<!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>FocusFlow Backend</title>
+          <meta name="viewport" content="width=device-width,initial-scale=1" />
+          <style>body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;color:#0f172a;background:#0f172a;color:#e6eef8;padding:24px} a{color:#7dd3fc}</style>
+        </head>
+        <body>
+          <h1>FocusFlow Backend</h1>
+          <p>Server is running. Try the health check or API endpoints below.</p>
+          <ul>
+            <li><a href="/health">/health</a></li>
+            <li><a href="/api/activities">/api/activities</a></li>
+            <li><a href="/api/leaderboard">/api/leaderboard</a></li>
+          </ul>
+          <p>For programmatic access, use the JSON API endpoints shown on this page.</p>
+        </body>
+      </html>`;
+
+    res.set('Content-Type', 'text/html');
+    return res.send(html);
+  }
+
+  // Otherwise return JSON with available endpoints
+  res.json({ message: 'FocusFlow Backend', available_endpoints: endpoints });
+});
+
 // Mock user storage
 const users = [];
 const completedActivities = [];

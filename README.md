@@ -51,6 +51,18 @@ npm run dev
 
 ## 🏭 Production Build (READY TO DEPLOY)
 
+## 🔁 Local quick deploy (no Docker)
+
+If you want to start the backend and frontend locally quickly (Windows PowerShell), run the PowerShell helper script included in `scripts/local-deploy.ps1`:
+
+```powershell
+cd "c:\Users\virbh\OneDrive\Desktop\Project\focusflow_mvp-project"
+.\scripts\local-deploy.ps1
+```
+
+This will open two PowerShell windows: one for the backend (runs `stable-backend.js`) and one for the frontend (Vite dev server).
+
+
 ```bash
 # Build Backend
 cd backend && npm run build
