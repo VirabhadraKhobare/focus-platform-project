@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: focusflow-backend
+    env: node
+    plan: free
+    repo: https://github.com/VirabhadraKhobare/focus-platform-project
+    branch: fix/network
+    buildCommand: cd backend && npm ci
+    startCommand: cd backend && npm run start:stable
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4000"
+    autoDeploy: true
