@@ -1,8 +1,15 @@
 import axios from 'axios';
 
-// Detect the correct backend port
+
+// Detect the correct backend URL for production and development
 const getBackendURL = () => {
-  // Default to 4000, but allow override via Vite env variables
+  // Use VITE_BACKEND_URL if set (for production deployments)
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  if (backendUrl) {
+    // Ensure no trailing slash and always append /api
+    return `${backendUrl.replace(/\/$/, '')}/api`;
+  }
+  // Fallback to localhost for local development
   const port = import.meta.env.VITE_BACKEND_PORT || '4000';
   return `http://localhost:${port}/api`;
 };
