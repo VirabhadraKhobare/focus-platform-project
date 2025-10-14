@@ -1,6 +1,22 @@
 services:
   - type: web
     name: focusflow-backend
+    env: docker
+    plan: free
+    repo: https://github.com/VirabhadraKhobare/focus-platform-project
+    branch: fix/network
+    dockerfilePath: backend/Dockerfile
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4000"
+    autoDeploy: true
+services:
+  - type: web
+    name: focusflow-backend
     env: node
     plan: free
     repo: https://github.com/VirabhadraKhobare/focus-platform-project
