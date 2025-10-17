@@ -16,13 +16,41 @@ app.use((req, res, next) => {
   next();
 });
 
-// CORS Configuration - Allow all origins for development
-app.use(cors({
-  origin: true, // Allow all origins in development
+// CORS Configuration - allow only configured frontend origins plus localhost for dev
+// Use environment variables to configure allowed origins in production:
+// - FRONTEND_URL (single URL) or
+// - CORS_ORIGIN (comma-separated list of allowed origins)
+const allowedOriginsEnv = process.env.FRONTEND_URL || process.env.CORS_ORIGIN || '';
+const allowedOrigins = allowedOriginsEnv.split(',').map(s => s.trim()).filter(Boolean);
+// Always allow common localhost dev origins
+const devLocalOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:4173',
+  `http://localhost:${PORT}`
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // If no origin (e.g., curl, server-to-server) allow it
+    if (!origin) return callback(null, true);
+
+    // Allow if origin is in env-configured list
+    if (allowedOrigins.length && allowedOrigins.includes(origin)) return callback(null, true);
+
+    // Allow common localhost dev origins
+    if (devLocalOrigins.includes(origin)) return callback(null, true);
+
+    // Otherwise reject
+    const msg = `CORS policy: Access from origin '${origin}' is not allowed.`;
+    return callback(new Error(msg), false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+};
+
+app.use(cors(corsOptions));
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
