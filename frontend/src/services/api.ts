@@ -2,16 +2,45 @@ import axios from 'axios';
 
 
 // Detect the correct backend URL for production and development
+// Priority:
+// 1. runtime override (window.__BACKEND_URL__)
+// 2. build-time VITE_BACKEND_URL (recommended for Vercel/Render)
+// 3. in production builds, use relative `/api` so the client talks to same origin
+// 4. in dev, fall back to localhost with VITE_BACKEND_PORT
+let runtimeOverride: string | null = null;
+
 const getBackendURL = () => {
-  // Use VITE_BACKEND_URL if set (for production deployments)
+  // runtime override (can be injected via a small <script> in index.html)
+  if (typeof window !== 'undefined' && (window as any).__BACKEND_URL__) {
+    runtimeOverride = (window as any).__BACKEND_URL__;
+    console.info('Using runtime backend override:', runtimeOverride);
+    return `${runtimeOverride.replace(/\/$/, '')}/api`;
+  }
+
+  // build-time env (Vite)
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   if (backendUrl) {
-    // Ensure no trailing slash and always append /api
+    console.info('Using VITE_BACKEND_URL:', backendUrl);
     return `${backendUrl.replace(/\/$/, '')}/api`;
   }
+
+  // In production builds prefer a relative path so the browser talks to the same origin
+  if (import.meta.env.PROD) {
+    console.warn('VITE_BACKEND_URL not set — using relative "/api" so the frontend uses the current origin. Set VITE_BACKEND_URL in Vercel for explicit backend.');
+    return '/api';
+  }
+
   // Fallback to localhost for local development
   const port = import.meta.env.VITE_BACKEND_PORT || '4000';
-  return `http://localhost:${port}/api`;
+  const fallback = `http://localhost:${port}/api`;
+  console.info('No backend env found — falling back to', fallback);
+  return fallback;
+};
+
+// Allow programmatic runtime override (useful for previews or manual testing)
+export const setRuntimeBackend = (url: string | null) => {
+  runtimeOverride = url;
+  if (typeof window !== 'undefined') (window as any).__BACKEND_URL__ = url;
 };
 
 const api = axios.create({
